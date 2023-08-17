@@ -9,6 +9,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static support.TestContext.getDriver;
 
 public class QuizStepDefs {
@@ -89,7 +90,7 @@ public class QuizStepDefs {
         List < WebElement> titles = getDriver().findElements(By.xpath("mat-panel-title"));
         for (WebElement title: titles) {
             if (title.getText().contains(quizTitle)){
-                title.isDisplayed();
+                assertThat(title.isDisplayed()).isTrue();
             }
 
         }
@@ -101,5 +102,30 @@ public class QuizStepDefs {
         getDriver().findElement(By.xpath("//mat-panel-title[contains(text(),'"+quizTitle+"')]/../../..//span[contains(text(),'Delete')]")).click();
         getDriver().findElement(By.xpath("//ac-modal-confirmation/..//span[contains(text(),'Delete')]")).click();
 
+    }
+
+    @And("I add {int} Textual questions")
+    public void iAddTextualQuestions(int num) throws InterruptedException {
+        for (int i = 1; i <= num; i++) {
+            getDriver().findElement(By.xpath("//mat-icon[contains(text(),'add_circle')]")).click();
+            Thread.sleep(1000);
+            getDriver().findElement(By.xpath("//*[contains(text(),'Q" + i + "')]/../../..//*[contains(text(),'Textual')]")).click();
+            String xpath = "//*[contains(text(),'Q" + i + "')]/../../..//*[@placeholder='Question *']";
+            getDriver().findElement(By.xpath(xpath)).sendKeys("Question " + i);
+        }
+    }
+
+    @Then("I verify that in quiz {string} total number of questions is {string}")
+    public void iVerifyTotalNumberOfQuestionsIs(String quizTitle, String expectedTotal) {
+        String actualTotal = getDriver().findElement(By.xpath("//mat-panel-title[contains(text(), '"+quizTitle+"')]/..//mat-panel-description")).getText();
+        assertThat(actualTotal.contains(expectedTotal)).isTrue();
+    }
+
+    @And("I add up to {int} options in {string}")
+    public void iAddUpToOptionsIn(int num, String questionNum) {
+        for (int i = 3 ; i <= num; i++){
+            getDriver().findElement(By.xpath("//*[contains(text(),'"+questionNum+"')]/../../..//*[contains(text(),'Add Option')]")).click();
+            getDriver().findElement(By.xpath("//mat-panel-title[contains(text(),'"+questionNum+"')]/../../..//*[@placeholder='Option "+i+"*']")).sendKeys("Option " +i);
+        }
     }
 }
